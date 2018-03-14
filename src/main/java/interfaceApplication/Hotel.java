@@ -301,7 +301,7 @@ public class Hotel {
 		JSONArray select = getAreaHotel_JSONArray(longitude, latitude, raidus, cond);
 		CollectionsUtil.sort_double(select, sortfeild, sort);
 
-		List<JSONObject> page = PageUtil.Page(select, idx, pagesize);
+		List<JSONObject> page = PageUtil.page(select, idx, pagesize);
 		return rMsg.netMSG(0, page);
 
 	}

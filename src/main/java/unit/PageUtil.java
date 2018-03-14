@@ -202,7 +202,7 @@ public class PageUtil<T> {
 		System.out.println(pageList);
 	}
 
-	public static <T> List<T> Page(List<T> items, int idx, int pagesize) {
+	public static <T> List<T> page(List<T> items, int idx, int pagesize) {
 		PageUtil<T> pageUtil = new PageUtil<T>();
 		pageUtil.setItems(items);
 		pageUtil.setCurrentPage(idx);
