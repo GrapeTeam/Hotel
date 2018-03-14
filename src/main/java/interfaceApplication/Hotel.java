@@ -28,7 +28,7 @@ import common.java.interfaceType.apiType.type;
 /**
  * @ClassName: Hotel
  * @Description: TODO(这里用一句话描述这个类的作用)
- * @author  longitude 酒店经度 latitude 酒店纬度
+ * @author longitude 酒店经度 latitude 酒店纬度
  * @date 2018年3月14日 上午10:19:50
  * 
  */
@@ -117,7 +117,7 @@ public class Hotel {
 	 * @return
 	 */
 	@apiType(type.sessionApi)
-	public String listHotel(double longitude, double latitude, int raidus, int idx, int pagesize, String hotORnearORscore, int sort) {
+	public String listHotel(double longitude, double latitude, int raidus, String hotORnearORscore, int sort) {
 		String netMSG = rMsg.netMSG(99, "");
 
 		if (userType == plvDef.UserMode.root) {
@@ -125,7 +125,7 @@ public class Hotel {
 		if (userType != plvDef.UserMode.root) {
 			hotel.eq("visable", 1);
 		}
-		netMSG = getAreaHotel_pageANDsort(longitude, latitude, raidus, idx, pagesize, null, hotORnearORscore, sort);
+		netMSG = getAreaHotel_sort(longitude, latitude, raidus, null, hotORnearORscore, sort);
 
 		return netMSG;
 
@@ -285,13 +285,13 @@ public class Hotel {
 	 */
 	@SuppressWarnings("unchecked")
 	@apiType(type.sessionApi)
-	public String getAreaHotel(double longitude, double latitude, int raidus, int idx, int pagesize, String cond) {
-		return getAreaHotel_pageANDsort(longitude, latitude, raidus, idx, pagesize, cond, "dx", 1);
+	public String getAreaHotel(double longitude, double latitude, int raidus, String cond) {
+		return getAreaHotel_sort(longitude, latitude, raidus, cond, "dx", 1);
 
 	}
 
 	@SuppressWarnings("unchecked")
-	String getAreaHotel_pageANDsort(double longitude, double latitude, int raidus, int idx, int pagesize, String cond, String sortfeild, int sort) {
+	String getAreaHotel_sort(double longitude, double latitude, int raidus, String cond, String sortfeild, int sort) {
 		if (raidus > 10000) {
 			return rMsg.netMSG(98, "半径不能超过10公里");
 		}
@@ -301,11 +301,26 @@ public class Hotel {
 		JSONArray select = getAreaHotel_JSONArray(longitude, latitude, raidus, cond);
 		CollectionsUtil.sort_double(select, sortfeild, sort);
 
-		List<JSONObject> page = PageUtil.page(select, idx, pagesize);
-		return rMsg.netMSG(0, page);
+		return rMsg.netMSG(0, select);
 
 	}
 
+	// @SuppressWarnings("unchecked")
+	// String getAreaHotel_pageANDsort(double longitude, double latitude, int
+	// raidus, int idx, int pagesize, String cond, String sortfeild, int sort) {
+	// if (raidus > 10000) {
+	// return rMsg.netMSG(98, "半径不能超过10公里");
+	// }
+	// if (Math.abs(longitude) > 180 || Math.abs(latitude) > 90 || raidus < 0) {
+	// return rMsg.netMSG(99, "参数不对");
+	// }
+	// JSONArray select = getAreaHotel_JSONArray(longitude, latitude, raidus, cond);
+	// CollectionsUtil.sort_double(select, sortfeild, sort);
+	//
+	// JSONArray page = (JSONArray) PageUtil.page(select, idx, pagesize);
+	// return rMsg.netMSG(0, page);
+	//
+	// }
 
 	JSONArray getAreaHotel_JSONArray(double longitude, double latitude, int raidus, String cond) {
 		double[] around = Distance.getAround(longitude, latitude, raidus);
