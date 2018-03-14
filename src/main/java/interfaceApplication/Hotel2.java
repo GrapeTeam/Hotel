@@ -32,7 +32,7 @@ public class Hotel2 {
 	private int userType;
 	private String pkString;
 	private int ugid;
-
+//
 	public Hotel2() {
 
 		hotel = new GrapeTreeDBModel();
