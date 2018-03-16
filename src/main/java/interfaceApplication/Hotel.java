@@ -44,7 +44,7 @@ public class Hotel {
 	private String userId;
 	private int userType;
 	private String pkString;
-	private int ugid;
+	private String ugid;
 
 	public Hotel() {
 
@@ -65,7 +65,7 @@ public class Hotel {
 			userName = usersInfo.getString("name"); // 当前用户姓名
 			userId = usersInfo.getString("id"); // 当前用户用户名
 			userType = usersInfo.getInt("userType");
-			ugid = usersInfo.getInt("ugid");
+			ugid = usersInfo.getString("ugid");
 		}
 	}
 
@@ -106,10 +106,6 @@ public class Hotel {
 	 *            纬度
 	 * @param raidus
 	 *            半径
-	 * @param idx
-	 *            页码
-	 * @param pagesize
-	 *            页最大条目数
 	 * @param hotORnearORscore
 	 *            排序选项
 	 * @param sort
@@ -287,6 +283,15 @@ public class Hotel {
 	@apiType(type.sessionApi)
 	public String getAreaHotel(double longitude, double latitude, int raidus, String cond) {
 		return getAreaHotel_sort(longitude, latitude, raidus, cond, "dx", 1);
+
+	}
+
+	@SuppressWarnings("unchecked")
+	@apiType(type.sessionApi)
+	public String choose_hotel(String hid) {
+		se.push("hid", hid);
+
+		return "";
 
 	}
 
