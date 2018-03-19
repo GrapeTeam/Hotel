@@ -11,6 +11,7 @@ import org.json.simple.JSONObject;
 import common.java.Concurrency.distributedLocker;
 import common.java.JGrapeSystem.rMsg;
 import common.java.apps.appsProxy;
+import common.java.authority.objectPower;
 import common.java.authority.plvDef;
 import common.java.authority.plvDef.plvType;
 import common.java.cache.CacheHelper;
@@ -23,7 +24,6 @@ import unit.CollectionsUtil;
 import unit.Distance;
 import unit.PageUtil;
 import common.java.interfaceType.apiType;
-import common.java.interfaceType.apiType.type;
 
 /**
  * @ClassName: Hotel
@@ -45,16 +45,16 @@ public class Hotel {
 	private int userType;
 	private String pkString;
 	private String ugid;
+	private String netMSG;
 
 	public Hotel() {
-
+		netMSG = rMsg.netMSG(0, "");
 		hotel = new GrapeTreeDBModel();
 		gDbSpecField = new GrapeDBSpecField();
 		gDbSpecField.importDescription(appsProxy.tableConfig("hotel"));
 		hotel.descriptionModel(gDbSpecField);
 		hotel.bindApp();
 		pkString = hotel.getPk();
-		hotel.enableCheck();
 
 		caches = new CacheHelper();
 		se = new session();
@@ -75,8 +75,9 @@ public class Hotel {
 	 * @param 酒店IDs
 	 * @return
 	 */
-	@apiType(type.sessionApi)
 	public String resumeHotel(String hids) {
+		hotel.enableCheck();
+
 		ArrayList<String> arrayList = new ArrayList<String>();
 		if (StringHelper.InvaildString(hids)) {
 			String[] hids_arr = hids.split(",");
@@ -112,9 +113,8 @@ public class Hotel {
 	 *            顺序:1 逆序:-1
 	 * @return
 	 */
-	@apiType(type.sessionApi)
 	public String listHotel(double longitude, double latitude, int raidus, String hotORnearORscore, int sort) {
-		String netMSG = rMsg.netMSG(99, "");
+		hotel.enableCheck();
 
 		if (userType == plvDef.UserMode.root) {
 		}
@@ -128,13 +128,14 @@ public class Hotel {
 	}
 
 	/**
-	 * TODO(冻结酒店，让该酒店无法显示在页面前端 ;管理员权限下冻结任意酒店; 酒店管理员权限下冻结自己所经营的酒店)
+	 * TODO(冻结酒店，让该酒店无法显示在页面前端 ;管理员权限下冻 结任意酒店; 酒店管理员权限下冻结自己所经营的酒店)
 	 * 
 	 * @param 酒店IDs
 	 * @return
 	 */
-	@apiType(type.sessionApi)
 	public String kickHotel(String hids) {
+		hotel.enableCheck();
+
 		ArrayList<String> arrayList = new ArrayList<String>();
 		if (StringHelper.InvaildString(hids)) {
 			String[] hids_arr = hids.split(",");
@@ -161,8 +162,9 @@ public class Hotel {
 	 * @param 酒店ID
 	 * @return
 	 */
-	@apiType(type.sessionApi)
 	public String deleteHotel(String hids) {
+		hotel.enableCheck();
+
 		ArrayList<String> arrayList = new ArrayList<String>();
 		if (StringHelper.InvaildString(hids)) {
 			String[] hids_arr = hids.split(",");
@@ -190,8 +192,9 @@ public class Hotel {
 	 * @param 基本酒店数据
 	 * @return
 	 */
-	@apiType(type.sessionApi)
 	public String updateHotel(String data) {
+		hotel.enableCheck();
+
 		boolean update = false;
 		JSONObject json = JSONObject.toJSON(data);
 		if (json != null) {
@@ -214,7 +217,6 @@ public class Hotel {
 	 * @param 基本酒店数据
 	 * @return
 	 */
-	@apiType(type.sessionApi)
 	public String insertHotel(String data) {
 		if (userType != plvDef.UserMode.root) {
 			return rMsg.netMSG(99, "账号权限不对");
@@ -223,19 +225,19 @@ public class Hotel {
 		JSONObject jsonObj = JSONObject.toJSON(data);
 		if (jsonObj != null) {
 			String ugid1 = jsonObj.getString("ugid");
-			String o = (String) appsProxy.proxyCall("/GrapeUser/user/getRoles/" + ugid1);
+			String o = (String) appsProxy.proxyCall("/GrapeUser/roles/find/" + ugid1);
 			JSONObject json = JSONObject.toJSON(o);
 			if (json.size() < 1) {
 				return rMsg.netMSG(98, "用户组id不存在,请先添加用户组");
 			}
-			hotel.checkMode();
+
 			JSONObject rMode = new JSONObject(plvType.chkType, plvType.powerVal).puts(plvType.chkVal, 100);// 设置默认查询权限
 			JSONObject uMode = new JSONObject(plvType.chkType, plvType.groupOwn).puts(plvType.chkVal, ugid1);
 			JSONObject dMode = new JSONObject(plvType.chkType, plvType.groupOwn).puts(plvType.chkVal, ugid1);
 			jsonObj.puts("rMode", rMode.toJSONString()); // 添加默认查看权限
 			jsonObj.puts("uMode", uMode.toJSONString()); // 添加默认修改权限
 			jsonObj.puts("dMode", dMode.toJSONString()); // 添加默认删除权限
-			ob = hotel.data(jsonObj).autoComplete().insertEx();
+			ob = hotel.data(jsonObj).autoComplete().insert();
 		}
 		return rMsg.netMSG(ob != null, (String) ob);
 	}
@@ -249,8 +251,8 @@ public class Hotel {
 	 * @param 各类基本条件的筛选
 	 * @return
 	 */
-	@apiType(type.sessionApi)
 	public String getHotelList(long cityid, long areaid, String cond) {
+		hotel.enableCheck();
 
 		JSONArray jsonArray = JSONArray.toJSONArray(cond);
 		hotel.eq("city", cityid).eq("area", areaid);
@@ -280,14 +282,12 @@ public class Hotel {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	@apiType(type.sessionApi)
 	public String getAreaHotel(double longitude, double latitude, int raidus, String cond) {
 		return getAreaHotel_sort(longitude, latitude, raidus, cond, "dx", 1);
 
 	}
 
 	@SuppressWarnings("unchecked")
-	@apiType(type.sessionApi)
 	public String choose_hotel(String hid) {
 		se.push("hid", hid);
 
