@@ -45,10 +45,10 @@ public class Hotel {
 	private int userType;
 	private String pkString;
 	private String ugid;
-	private String netMSG;
+	private String netMSG = rMsg.netMSG(0, "");
+	private String uid;
 
 	public Hotel() {
-		netMSG = rMsg.netMSG(0, "");
 		hotel = new GrapeTreeDBModel();
 		gDbSpecField = new GrapeDBSpecField();
 		gDbSpecField.importDescription(appsProxy.tableConfig("hotel"));
@@ -66,7 +66,12 @@ public class Hotel {
 			userId = usersInfo.getString("id"); // 当前用户用户名
 			userType = usersInfo.getInt("userType");
 			ugid = usersInfo.getString("ugid");
+			uid = usersInfo.getString(pkString);//用户主键id
 		}
+	}
+
+	public String test1() {
+		return "aaaaaaaaaaaaaaa";
 	}
 
 	/**
@@ -77,9 +82,12 @@ public class Hotel {
 	 */
 	public String resumeHotel(String hids) {
 		hotel.enableCheck();
+		if (userType < plvDef.UserMode.admin) {
+			return rMsg.netMSG(99, "账号权限不对,需要酒店管理员以上权限");
+		}
 
 		ArrayList<String> arrayList = new ArrayList<String>();
-		if (StringHelper.InvaildString(hids)) {
+		if (!StringHelper.InvaildString(hids)) {
 			String[] hids_arr = hids.split(",");
 			for (String hid : hids_arr) {
 				boolean updateEx = hotel.eq(pkString, hid).show();
@@ -135,6 +143,9 @@ public class Hotel {
 	 */
 	public String kickHotel(String hids) {
 		hotel.enableCheck();
+		if (userType < plvDef.UserMode.admin) {
+			return rMsg.netMSG(99, "账号权限不对,需要酒店管理员以上权限");
+		}
 
 		ArrayList<String> arrayList = new ArrayList<String>();
 		if (StringHelper.InvaildString(hids)) {
@@ -164,6 +175,9 @@ public class Hotel {
 	 */
 	public String deleteHotel(String hids) {
 		hotel.enableCheck();
+		if (userType != plvDef.UserMode.root) {
+			return rMsg.netMSG(99, "账号权限不对,需要管理员权限");
+		}
 
 		ArrayList<String> arrayList = new ArrayList<String>();
 		if (StringHelper.InvaildString(hids)) {
@@ -194,6 +208,9 @@ public class Hotel {
 	 */
 	public String updateHotel(String data) {
 		hotel.enableCheck();
+		if (userType < plvDef.UserMode.admin) {
+			return rMsg.netMSG(99, "账号权限不对,需要酒店管理员以上权限");
+		}
 
 		boolean update = false;
 		JSONObject json = JSONObject.toJSON(data);
@@ -218,8 +235,9 @@ public class Hotel {
 	 * @return
 	 */
 	public String insertHotel(String data) {
+		// hotel.enableCheck();
 		if (userType != plvDef.UserMode.root) {
-			return rMsg.netMSG(99, "账号权限不对");
+			return rMsg.netMSG(99, "账号权限不对,需要管理员权限");
 		}
 		Object ob = null;
 		JSONObject jsonObj = JSONObject.toJSON(data);
@@ -237,7 +255,7 @@ public class Hotel {
 			jsonObj.puts("rMode", rMode.toJSONString()); // 添加默认查看权限
 			jsonObj.puts("uMode", uMode.toJSONString()); // 添加默认修改权限
 			jsonObj.puts("dMode", dMode.toJSONString()); // 添加默认删除权限
-			ob = hotel.data(jsonObj).autoComplete().insert();
+			ob = hotel.data(jsonObj).autoComplete().insertEx();
 		}
 		return rMsg.netMSG(ob != null, (String) ob);
 	}
@@ -358,4 +376,12 @@ public class Hotel {
 		return select;
 	}
 
+	public JSONObject find(String hid) {
+		JSONObject find = hotel.eq(pkString, hid).find();
+		if (find == null || find.size() == 0) {
+			return null;
+		} else {
+			return find;
+		}
+	}
 }
