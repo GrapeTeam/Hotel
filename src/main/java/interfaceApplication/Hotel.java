@@ -66,7 +66,7 @@ public class Hotel {
 			userId = usersInfo.getString("id"); // 当前用户用户名
 			userType = usersInfo.getInt("userType");
 			ugid = usersInfo.getString("ugid");
-			uid = usersInfo.getString(pkString);//用户主键id
+			uid = usersInfo.getString(pkString);// 用户主键id
 		}
 	}
 
@@ -90,7 +90,7 @@ public class Hotel {
 		if (!StringHelper.InvaildString(hids)) {
 			String[] hids_arr = hids.split(",");
 			for (String hid : hids_arr) {
-				boolean updateEx = hotel.eq(pkString, hid).show();
+				boolean updateEx = hotel.eq(pkString, hid).eq("deleteable", 0).show();
 				if (!updateEx) {
 					arrayList.add(hid);
 				}
@@ -151,7 +151,7 @@ public class Hotel {
 		if (StringHelper.InvaildString(hids)) {
 			String[] hids_arr = hids.split(",");
 			for (String hid : hids_arr) {
-				boolean updateEx = hotel.eq(pkString, hid).hide();
+				boolean updateEx = hotel.eq(pkString, hid).eq("deleteable", 0).hide();
 				if (!updateEx) {
 					arrayList.add(hid);
 				}
@@ -183,7 +183,7 @@ public class Hotel {
 		if (StringHelper.InvaildString(hids)) {
 			String[] hids_arr = hids.split(",");
 			for (String hid : hids_arr) {
-				boolean updateEx = hotel.eq(pkString, hid).deleteEx();
+				boolean updateEx = hotel.eq(pkString, hid).eq("deleteable", 0).deleteEx();
 				if (!updateEx) {
 					arrayList.add(hid);
 				}
@@ -222,7 +222,7 @@ public class Hotel {
 				if (userType == plvDef.UserMode.admin) {
 					json.remove("name");
 				}
-				update = hotel.eq(pkString, _id).data(json).updateEx();
+				update = hotel.eq(pkString, _id).data(json).eq("deleteable", 0).updateEx();
 			}
 		}
 		return rMsg.netMSG(0, update);
@@ -273,11 +273,11 @@ public class Hotel {
 		hotel.enableCheck();
 
 		JSONArray jsonArray = JSONArray.toJSONArray(cond);
-		hotel.eq("city", cityid).eq("area", areaid);
+		hotel.eq("city", cityid).eq("area", areaid).eq("deleteable", 0);
 		if (jsonArray != null) {
 			hotel.where(jsonArray);
 		}
-		JSONArray select = hotel.select();
+		JSONArray select = hotel.eq("deleteable", 0).select();
 		return rMsg.netMSG(0, select);
 
 	}
@@ -359,7 +359,7 @@ public class Hotel {
 		if (jsonArray.size() > 0) {
 			hotel.and().where(jsonArray);
 		}
-		JSONArray select = hotel.select();
+		JSONArray select = hotel.eq("deleteable", 0).select();
 		for (Object object : select) {
 			JSONObject obj = (JSONObject) object;
 			double longitude1 = (double) obj.get("longitude");
@@ -376,12 +376,15 @@ public class Hotel {
 		return select;
 	}
 
-	public JSONObject find(String hid) {
-		JSONObject find = hotel.eq(pkString, hid).find();
+	public String find(String hid) {
+		if (!StringHelper.InvaildString(hid)) {
+			return null;
+		}
+		JSONObject find = hotel.eq(pkString, hid).eq("deleteable", 0).find();
 		if (find == null || find.size() == 0) {
 			return null;
 		} else {
-			return find;
+			return find.toJSONString();
 		}
 	}
 }

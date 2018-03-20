@@ -73,7 +73,7 @@ public class Hotel_brand {
 		if (json == null || json.size() == 0) {
 			return rMsg.netMSG(2, "json非法");
 		}
-		boolean updateEx = hotel_brand.eq(pkString, bid).data(json).updateEx();
+		boolean updateEx = hotel_brand.eq(pkString, bid).data(json).eq("deleteable", 0).updateEx();
 		msg = updateEx ? rMsg.netMSG(0, "更新成功") : rMsg.netMSG(99, "更新失败");
 		return msg;
 	}
@@ -123,7 +123,7 @@ public class Hotel_brand {
 		if (!StringHelper.InvaildString(bid)) {
 			return rMsg.netMSG(3, "id为空");
 		}
-		boolean updateEx = hotel_brand.eq(pkString, bid).deleteEx();
+		boolean updateEx = hotel_brand.eq(pkString, bid).eq("deleteable", 0).deleteEx();
 		msg = updateEx ? rMsg.netMSG(0, "删除成功") : rMsg.netMSG(99, "删除失败");
 		return msg;
 

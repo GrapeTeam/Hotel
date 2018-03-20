@@ -67,7 +67,7 @@ public class Hotel_comment {
 		if (StringHelper.InvaildString(eids)) {
 			String[] eids_arr = eids.split(",");
 			for (String eid : eids_arr) {
-				boolean updateEx = hotel_comment.eq(pkString, eid).hide();
+				boolean updateEx = hotel_comment.eq(pkString, eid).eq("deleteable", 0).hide();
 				if (!updateEx) {
 					arrayList.add(eid);
 				}
@@ -104,7 +104,7 @@ public class Hotel_comment {
 			return rMsg.netMSG(97, "酒店id为空");
 		} else {
 			Hotel hotel = new Hotel();
-			JSONObject find = hotel.find(hid);
+			String find = hotel.find(hid);
 			if (find == null) {
 				return rMsg.netMSG(96, "酒店id不存在");
 			}

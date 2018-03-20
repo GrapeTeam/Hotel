@@ -73,7 +73,7 @@ public class Hotel_room {
 				hotel_room.where(jsonArray);
 			}
 		}
-		JSONArray select = hotel_room.select();
+		JSONArray select = hotel_room.eq("deleteable", 0).select();
 		if (select != null && select.size() > 0) {
 			msg = select.toJSONString();
 		}

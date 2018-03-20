@@ -104,6 +104,14 @@ public class Hotel_order {
 		if (!StringHelper.InvaildString(uid)) {
 			return rMsg.netMSG(99, "用户未登录");
 		}
+		if (!StringHelper.InvaildString(hid)) {
+			return rMsg.netMSG(97, "会话里的酒店id为空");
+		} else {
+			String find = new Hotel().find(hid);
+			if (find == null) {
+				return rMsg.netMSG(96, "会话里的酒店id已经删除");
+			}
+		}
 		JSONObject json = JSONObject.toJSON(time);
 		if (!json.containsKey("start") || !json.containsKey("end")) {
 			return rMsg.netMSG(98, "起始或者末尾时间未设置");
@@ -111,7 +119,7 @@ public class Hotel_order {
 		}
 		long start = json.getLong("start");
 		long end = json.getLong("end");
-		JSONArray select = hotel_order.eq("hid", hid).gte("time", start).lte("end", end).select();
+		JSONArray select = hotel_order.eq("hid", hid).gte("time", start).lte("end", end).eq("deleteable", 0).select();
 		return rMsg.netMSG(0, select.toJSONString());
 
 	}
@@ -121,6 +129,8 @@ public class Hotel_order {
 	 * 
 	 * @param time
 	 *            预定时间段
+	 * @param time
+	 *            酒店id
 	 * @return
 	 */
 	public String findOrder_by_user(String time, String hid) {
@@ -134,7 +144,7 @@ public class Hotel_order {
 		}
 		long start = json.getLong("start");
 		long end = json.getLong("end");
-		JSONArray select = hotel_order.eq("hid", hid).gte("time", start).lte("end", end).select();
+		JSONArray select = hotel_order.eq("hid", hid).gte("time", start).lte("end", end).eq("deleteable", 0).select();
 		return rMsg.netMSG(0, select.toJSONString());
 
 	}
